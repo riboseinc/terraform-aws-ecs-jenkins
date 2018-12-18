@@ -1,0 +1,158 @@
+= Terraform module to setup Jenkins ECS task
+
+This module helps you create Jenkins ECS task service and the related task role, assuming that:
+
+* you have created a ECS cluster
+* you have created a security group with the ECS instance
+* you have created a VPC
+* you have created primary subnet and secondary subnet for VPC
+* you have created a EBS volume for mounting as Jenkins's home folder
+* you have created a SSL certificate for internal ELB
+* you have created a role for Jenkins ECS service
+* and of course, your AWS account provides you access to all these resources necessary.
+
+== Sample Usage
+
+You can literally copy and paste the following example, change the following attributes, and you're ready to go:
+
+* `jenkins-java-opts`: set it to JAVA options to start Jenkins container
+* `env` set it to the name of environment name (e.g., `test`)
+* `identifier` set it to the identifier (e.g., `myidentifier`)
+* `name` set it to the name of Jenkins (e.g., `jenkins`)
+* `ecs-cluster-id` set it to the arn of an ECS cluster 
+* `sg-id` set it to the security group id of the ECS instance
+* `subnet-primary-id` set it to the id of the primary subnet for internal ELB
+* `subnet-secondary-id` set it to the id of the secondary subnet for internal ELB
+* `subnet-primary-cidr` set it to the CIDR of the primary subnet for setting up security group rules
+* `subnet-secondary-cidr` set it to the CIDR of the secondary subnet for setting up security group rules
+* `vpc-id` set it to VPC id for internal security group of ELB
+* `r53-public-zone-id` set it to zone_id of ELB Route53 record
+* `r53-public-zone-name` set it to name of ELB Route53 record
+* `r53-internal-zone-id` set it to zone_id of ELB Route53 private record
+* `r53-internal-zone-name` set it to name of ELB Route53 private record
+* `ports` set it to ports of `jenkins_backup_scp`, `jenkins_http`, `jnlp`, `http`, `https`
+* `enable-service` set it to `true` to enable Jenkins
+* `mount_point` set it to mount point of the volume of Jenkins
+* `container_image` set it to the container image of Jenkins
+* `iam-certificate-arn` set it to the arn of SSL certificate
+* `ecs-scheduler-role-arn` set it to the arn of the IAM role that allows Amazon ECS to make calls to your load balancer on your behalf.
+
+[source,hcl]
+----
+# include this module and enter the values of input variables
+module "ecs-jenkins" {
+  source = "github.com/riboseinc/terraform-aws-ecs-jenkins"
+
+  jenkins-java-opts = "${var.jenkins-java-opts}"
+  env = "${var.env}"
+  identifier = "${var.identifier}"
+  name = "${var.name}"
+  ecs-cluster-id = "${var.ecs-cluster-id}"
+  sg-id = "${var.sg-id}"
+  subnet-primary-id = "${var.vpc-subnet-primary-id}"
+  subnet-secondary-id = "${var.vpc-subnet-secondary-id}"
+  subnet-primary-cidr = "${var.vpc-subnet-primary-cidr}"
+  subnet-secondary-cidr = "${var.vpc-subnet-secondary-cidr}"
+  vpc-id = "${var.vpc-id}"
+  r53-public-zone-id = "${var.r53-public-zone-id}"
+  r53-public-zone-name = "${var.r53-public-zone-name}"
+  r53-internal-zone-id = "${var.r53-internal-zone-id}"
+  r53-internal-zone-name = "${var.r53-internal-zone-name}"
+  ports = "${var.ports}"
+  enable-service = "${var.enable-service}"
+  mount_point = "${var.mount_point}"
+  container_image = "${var.container_image}"
+  iam-certificate-arn = "${var.iam-certificate-arn}"
+  ecs-scheduler-role-arn = "${var.ecs-scheduler-role-arn}"
+}
+
+variable "jenkins-java-opts" {
+  default = "-Xmx4096m"
+}
+
+variable "env" {
+  default = "test"
+}
+
+variable "identifier" {
+  default = "myidentifier"
+}
+
+variable "name" {
+  default = "jenkins"
+}
+
+variable "ecs-cluster-id" {
+  default = "ecs-cluster-arn"
+}
+
+variable "sg-id" {
+  default = "security-group-id"
+}
+
+variable "subnet-primary-id" {
+  default = "primary-subnet-id"
+}
+
+variable "subnet-secondary-id" {
+  default = "secondary-subnet-id"
+}
+
+variable "subnet-primary-cidr" {
+  default = "primary-subnet-cidr"
+}
+
+variable "subnet-secondary-cidr" {
+  default = "secondary-subnet-cidr"
+}
+
+variable "vpc-id" {
+  default = "vpc-id"
+}
+
+variable "r53-public-zone-id" {
+  default = "r53-public-zone-id"
+}
+
+variable "r53-public-zone-name" {
+  default = "r53-public-zone-nam"
+}
+
+variable "r53-internal-zone-id" {
+  default = "r53-internal-zone-id"
+}
+
+variable "r53-internal-zone-name" {
+  default = "r53-internal-zone-name"
+}
+
+variable "ports" {
+  default = {
+    http               = 80
+    https              = 443
+    jenkins_backup_scp = 2233
+    jenkins_http       = 8080
+    jnlp               = 50000
+  }
+}
+
+variable "enable-service" {
+  default = "true"
+}
+
+variable "mount_point" {
+  default = "jenkins_home"
+}
+
+variable "container_image" {
+  default = "jenkins_container_image"
+}
+
+variable "iam-certificate-arn" {
+  default = "iam-certificate-arn"
+}
+
+variable "ecs-scheduler-role-arn" {
+  default = "ecs-scheduler-role-arn"
+}
+----

@@ -19,6 +19,5 @@ variable "ports" {
 variable "enable-service" {}
 variable "mount_point" {}
 variable "container_image" {}
-variable "iam-certificate-id" {}
 variable "iam-certificate-arn" {}
 variable "ecs-scheduler-role-arn" {}
